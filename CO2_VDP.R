@@ -1,6 +1,7 @@
 # Pakete laden
 library(readr)
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 
 # Daten einlesen
