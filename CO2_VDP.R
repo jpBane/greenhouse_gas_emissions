@@ -39,16 +39,20 @@ co2_spez_tidy %>%
          subtitle = expression("Spezifische CO"[2]*" Emission im Vergleich zur produzierten Papiermenge"),
          x = NULL,
          y = NULL,
-         caption = "Quelle: VDP Leistungsbericht Papier 2017 & 2021")
+         caption = "Quelle: VDP Leistungsbericht Papier 2017, 2021-2023")
+
+reference_1995 = co2_total$mio_t_co2[2]
 
 co2_total %>% 
   ggplot(aes(x = Jahr, y = mio_t_co2)) +
     geom_point() +
     geom_line() +
     geom_smooth(method = "loess") +
-    geom_hline(yintercept = 14.14641*0.2, lty = 2) +
-    geom_hline(yintercept = 14.14641, lty = 2) +
-    labs(title = expression("CO"[2]*" Emissionen der deutschen Papierindustrie 1995-2020"),
+    geom_hline(yintercept = reference_1995, lty = 2) +
+    geom_text(aes(x = max(Jahr), y = reference_1995, label = "100%", vjust = -1)) +
+    geom_hline(yintercept = reference_1995*0.2, lty = 2) +
+    geom_text(aes(x = max(Jahr), y = reference_1995*0.2, label = "-80%", vjust = -1)) +
+    labs(title = expression("CO"[2]*" Emissionen der deutschen Papierindustrie 1995-2023"),
          subtitle = expression("in Mio. t CO"[2]),
          x = NULL,
          y = NULL)
