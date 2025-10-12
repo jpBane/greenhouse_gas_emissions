@@ -17,29 +17,23 @@ co2_total <- co2_spez %>%
          mio_t_co2 = t_co2/10^6)
 
 # Daten visualisieren
-co2_spez %>% 
-  ggplot(aes(x = Jahr, y = t_co2_t)) +
-    geom_point(color = "#0078bb") +
-    geom_line(color = "#0078bb") +
-    geom_area(fill = "#0078bb", alpha = 0.5) +
-    theme_classic() +
-    labs(title = expression("CO"[2]*" Emissionen der deutschen Papierindustrie 1995-2020"),
-         subtitle = expression("in Tonnen CO"[2]*" / Tonne Papier"),
-         x = NULL,
-         y = NULL,
-         caption = "Quelle: VDP Leistungsbericht Papier 2017 & 2021")
+max_jahr = max(co2_spez$Jahr)
 
 co2_spez_tidy %>% 
-  mutate(Parameter = ifelse(Parameter == "prod_1000t", "Papierproduktion [1000 t]", "Spez. CO2 Emission [t / t Papier]")) %>% 
+  mutate(Parameter = recode(Parameter, 
+                            "t_co2_t" = "Spez. CO2 Emission [t / t Papier]",
+                            "prod_1000t" = "Papierproduktion [1000 t]",
+                            "n_werke" = "Anzahl Werke / Standorte",
+                            "n_pm" = "Anzahl Papiermaschinen")) %>% 
   ggplot(aes(x = Jahr, y = Wert)) +
     geom_point() +
     geom_line() +
     facet_wrap(~Parameter, ncol = 1, scales = "free_y") +
-    labs(title = expression("CO"[2]*" Emissionen der deutschen Papierindustrie 1995-2020"),
-         subtitle = expression("Spezifische CO"[2]*" Emission im Vergleich zur produzierten Papiermenge"),
+    labs(title = bquote("Spezifische CO"[2]*" Emissionen der deutschen Papierindustrie 1995-"*.(max_jahr)),
+         subtitle = expression("Im Kontext verschiedener Rahmenbedingungen"),
          x = NULL,
          y = NULL,
-         caption = "Quelle: VDP Leistungsbericht Papier 2017, 2021-2023")
+         caption = "Quelle: VDP Leistungsbericht Papier 2017, 2021-2025")
 
 reference_1995 = co2_total$mio_t_co2[2]
 
@@ -52,7 +46,7 @@ co2_total %>%
     geom_text(aes(x = max(Jahr), y = reference_1995, label = "100%", vjust = -1)) +
     geom_hline(yintercept = reference_1995*0.2, lty = 2) +
     geom_text(aes(x = max(Jahr), y = reference_1995*0.2, label = "-80%", vjust = -1)) +
-    labs(title = expression("CO"[2]*" Emissionen der deutschen Papierindustrie 1995-2023"),
+    labs(title = bquote("CO"[2]*" Emissionen der deutschen Papierindustrie 1995-"*.(max_jahr)),
          subtitle = expression("in Mio. t CO"[2]),
          x = NULL,
          y = NULL)
@@ -65,4 +59,15 @@ co2_total[19,5]*100/co2_total[2,5] # da stehen wir 2020. Knappe 84%
 # Vorhersage
 # -------------
 
-
+co2_total %>% 
+  filter(Jahr > 2010) %>% 
+  add_row(Jahr = 2050) %>% 
+  ggplot(aes(x = Jahr, y = mio_t_co2)) +
+    geom_point() +
+    stat_smooth(method = "lm", fullrange = T) +
+    geom_hline(yintercept = reference_1995, lty = 2) +
+    geom_text(aes(x = max(Jahr), y = reference_1995, label = "100%", vjust = -1)) +
+    geom_hline(yintercept = reference_1995*0.2, lty = 2) +
+    geom_text(aes(x = max(Jahr), y = reference_1995*0.2, label = "-80%", vjust = -1)) +
+    labs(title = expression("Prognose zukünftiger CO"[2]*" Emissionen"),
+         subtitle = "Lineares Modell basierend auf Daten seit 2011")
